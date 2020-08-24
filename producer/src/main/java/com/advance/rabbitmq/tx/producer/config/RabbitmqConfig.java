@@ -1,9 +1,13 @@
 package com.advance.rabbitmq.tx.producer.config;
 
 import org.springframework.amqp.core.*;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import javax.annotation.PostConstruct;
 
 /**
  * @program: rabbitmqtx
@@ -13,6 +17,9 @@ import org.springframework.context.annotation.Configuration;
  **/
 @Configuration
 public class RabbitmqConfig {
+
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
 
     /**
      * 交换机名称
@@ -46,6 +53,11 @@ public class RabbitmqConfig {
     public Binding demoQueueExchange(@Qualifier("demoQueue") Queue queue,
                                      @Qualifier("demoTopicExchange") Exchange exchange){
         return BindingBuilder.bind(queue).to(exchange).with("demo.#").noargs();
+    }
+
+    @PostConstruct
+    public void rabbitTemplate(){
+        rabbitTemplate.setConfirmCallback(new ConfirmCallbackHandler());
     }
 
 }
