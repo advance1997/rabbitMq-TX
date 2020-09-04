@@ -24,7 +24,24 @@ public class RabbitmqConfig {
     public static final String DEMO_QUEUE = "demo_queue";
 
     /**
-     * 声明交换机Bean
+     * fanout交换机名称
+     */
+    public static final String DEMO_FANOUT_EXCHANGE = "demo_fanout_exchange";
+    /**
+     * fanout队列名称
+     */
+    public static final String DEMO_FANOUT_QUEUE = "demo_fanout_queue";
+    /**
+     * direct交换机名称
+     */
+    public static final String DEMO_DIRECT_EXCHANGE = "demo_direct_exchange";
+    /**
+     * direct队列名称
+     */
+    public static final String DEMO_DIRECT_QUEUE = "demo_direct_queue";
+
+    /**
+     * 声明Topic交换机Bean
      */
     @Bean("demoTopicExchange")
     public Exchange topicExchange(){
@@ -32,7 +49,22 @@ public class RabbitmqConfig {
     }
 
     /**
-     * 声明队列
+     * 声明Fanout交换机Bean
+     */
+    @Bean("demoFanoutExchange")
+    public Exchange fanoutExchange(){
+        return ExchangeBuilder.fanoutExchange(DEMO_FANOUT_EXCHANGE).durable(true).build();
+    }
+    /**
+     * 声明direct交换机Bean
+     */
+    @Bean("demoDirectExchange")
+    public Exchange directExchange(){
+        return ExchangeBuilder.directExchange(DEMO_DIRECT_EXCHANGE).durable(true).build();
+    }
+
+    /**
+     * 声明topic队列
      */
     @Bean("demoQueue")
     public Queue demoQueue(){
@@ -40,12 +72,46 @@ public class RabbitmqConfig {
     }
 
     /**
-     * 绑定队列和交换机
+     * 声明fanout队列
+     */
+    @Bean("fanoutQueue")
+    public Queue fanoutQueue(){
+        return QueueBuilder.durable(DEMO_FANOUT_QUEUE).build();
+    }
+
+    /**
+     * 声明direct队列
+     */
+    @Bean("directQueue")
+    public Queue directQueue(){
+        return QueueBuilder.durable(DEMO_DIRECT_QUEUE).build();
+    }
+
+    /**
+     * 绑定topic队列和交换机
      */
     @Bean
     public Binding demoQueueExchange(@Qualifier("demoQueue") Queue queue,
                                      @Qualifier("demoTopicExchange") Exchange exchange){
         return BindingBuilder.bind(queue).to(exchange).with("demo.#").noargs();
+    }
+
+    /**
+     * 绑定fanout队列和交换机
+     */
+    @Bean
+    public Binding demoQueueFanoutExchange(@Qualifier("fanoutQueue") Queue queue,
+                                           @Qualifier("demoFanoutExchange") Exchange exchange){
+        return BindingBuilder.bind(queue).to(exchange).with("demo.fanout.#").noargs();
+    }
+
+    /**
+     * 绑定direct队列和交换机
+     */
+    @Bean
+    public Binding demoQueueDirectExchange(@Qualifier("directQueue") Queue queue,
+                                           @Qualifier("demoDirectExchange") Exchange exchange){
+        return BindingBuilder.bind(queue).to(exchange).with("demo.direct.#").noargs();
     }
 
 }

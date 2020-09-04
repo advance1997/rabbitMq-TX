@@ -1,13 +1,9 @@
-package com.advance.rabbitmq.tx.producer.config;
+package com.advance.rabbitmq.tx.consumer2.config;
 
 import org.springframework.amqp.core.*;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import javax.annotation.PostConstruct;
 
 /**
  * @program: rabbitmqtx
@@ -18,9 +14,6 @@ import javax.annotation.PostConstruct;
 @Configuration
 public class RabbitmqConfig {
 
-    @Autowired
-    private RabbitTemplate rabbitTemplate;
-
     /**
      * 交换机名称
      */
@@ -29,6 +22,7 @@ public class RabbitmqConfig {
      * 队列名称
      */
     public static final String DEMO_QUEUE = "demo_queue";
+
     /**
      * fanout交换机名称
      */
@@ -47,7 +41,7 @@ public class RabbitmqConfig {
     public static final String DEMO_DIRECT_QUEUE = "demo_direct_queue";
 
     /**
-     * 声明交换机Bean
+     * 声明Topic交换机Bean
      */
     @Bean("demoTopicExchange")
     public Exchange topicExchange(){
@@ -61,7 +55,6 @@ public class RabbitmqConfig {
     public Exchange fanoutExchange(){
         return ExchangeBuilder.fanoutExchange(DEMO_FANOUT_EXCHANGE).durable(true).build();
     }
-
     /**
      * 声明direct交换机Bean
      */
@@ -71,7 +64,7 @@ public class RabbitmqConfig {
     }
 
     /**
-     * 声明队列
+     * 声明topic队列
      */
     @Bean("demoQueue")
     public Queue demoQueue(){
@@ -80,7 +73,6 @@ public class RabbitmqConfig {
 
     /**
      * 声明fanout队列
-     * 不处理路由键。只需要简单的将队列绑定到交换机上。
      */
     @Bean("fanoutQueue")
     public Queue fanoutQueue(){
@@ -96,12 +88,21 @@ public class RabbitmqConfig {
     }
 
     /**
-     * 绑定队列和交换机
+     * 绑定topic队列和交换机
      */
     @Bean
     public Binding demoQueueExchange(@Qualifier("demoQueue") Queue queue,
                                      @Qualifier("demoTopicExchange") Exchange exchange){
         return BindingBuilder.bind(queue).to(exchange).with("demo.#").noargs();
+    }
+
+    /**
+     * 绑定fanout队列和交换机
+     */
+    @Bean
+    public Binding demoQueueFanoutExchange(@Qualifier("fanoutQueue") Queue queue,
+                                           @Qualifier("demoFanoutExchange") Exchange exchange){
+        return BindingBuilder.bind(queue).to(exchange).with("demo.fanout.#").noargs();
     }
 
     /**
@@ -111,17 +112,6 @@ public class RabbitmqConfig {
     public Binding demoQueueDirectExchange(@Qualifier("directQueue") Queue queue,
                                            @Qualifier("demoDirectExchange") Exchange exchange){
         return BindingBuilder.bind(queue).to(exchange).with("demo.direct.#").noargs();
-    }
-
-    /**
-     * 添加消息确认机制
-     */
-    @PostConstruct
-    public void rabbitTemplate(){
-        rabbitTemplate.setConfirmCallback(new ConfirmCallbackHandler());
-        rabbitTemplate.setReturnCallback(new ReturnCallbackHandler());
-        //不设置mandatory为true时，当消息未到达queue时，不会触发ReturnCallback回调，消息会丢失
-        rabbitTemplate.setMandatory(true);
     }
 
 }

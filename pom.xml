@@ -12,6 +12,11 @@
         <module>producer</module>
         <module>consumer</module>
         <module>common</module>
+        <module>consumer2</module>
+        <module>account-api</module>
+        <module>account-provider</module>
+        <module>order-api</module>
+        <module>order-provider</module>
     </modules>
 
     <properties>
